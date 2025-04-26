@@ -1,15 +1,16 @@
 """
 Tests for models
 """
+from unittest.mock import patch
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from ..models import Recipe, Tag
+from .. import models
 
 
-def create_user(**params):
-    """Creating and return new user"""
-    return get_user_model().objects.create_user(**params)
+def create_user(email='user@example.com', password='testpas123'):
+    """Create and return a user."""
+    return get_user_model().objects.create_user(email=email, password=password)
 
 
 class ModelTests(TestCase):
@@ -59,14 +60,14 @@ class ModelTests(TestCase):
 
     def test_create_recipe(self):
         """Test creating recipe is successful"""
-        payload = {
-            'email': 'test@example.com',
-            'password': 'testpass123',
-            'name': 'Test Name',
-        }
-        user = create_user(**payload)
+        # payload = {
+        #     'email': 'test@example.com',
+        #     'password': 'testpass123',
+        #     'name': 'Test Name',
+        # }
+        user = create_user()
 
-        recipe = Recipe.objects.create(
+        recipe = models.Recipe.objects.create(
             user=user,
             title='Sample recipe name',
             time_minutes=5,
@@ -78,6 +79,23 @@ class ModelTests(TestCase):
     def test_create_tage(self):
         """Test creating a tag is successful."""
         user = create_user(email="user@example.com", password="testpas123")
-        tag = Tag.objects.create(user=user, name='Tag1')
+        tag = models.Tag.objects.create(user=user, name='Tag1')
 
         self.assertEqual(str(tag), tag.name)
+
+    def test_create_ingredient(self):
+        """Test creating and ingredient is successful."""
+        user = create_user()
+        ingredient = models.Ingredient.objects.create(user=user, name='Ingredient1')
+
+        self.assertEqual(str(ingredient), ingredient.name)
+
+    @patch('core.models.uuid.uuid4')
+    def test_recipe_file_name_uuid(self, mock_uuid):
+        """Test generating image path."""
+        uuid = 'test_uuid'
+        mock_uuid.return_value = uuid
+        file_path = models.recipe_image_file_path(None, 'example.jpg')
+
+        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')
+
