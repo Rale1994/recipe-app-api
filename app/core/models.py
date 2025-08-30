@@ -92,6 +92,6 @@ class Ingredient(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-
+    type = models.CharField(max_length=255, default="for eating")
     def __str__(self):
         return self.name
