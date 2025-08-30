@@ -92,6 +92,7 @@ class Ingredient(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    number = models.IntegerField(max_length=5, default=10)
 
     def __str__(self):
         return self.name
